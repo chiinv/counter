@@ -7,13 +7,11 @@ const result = document.getElementById('countResult');
 
 let model;
 
-// モデル読み込み
 async function loadModel() {
   model = await cocoSsd.load();
 }
 loadModel();
 
-// カメラ起動
 navigator.mediaDevices.getUserMedia({ video: true })
   .then(stream => {
     video.srcObject = stream;
@@ -22,7 +20,6 @@ navigator.mediaDevices.getUserMedia({ video: true })
     console.error('カメラ起動エラー:', err);
   });
 
-// ファイルアップロード時の処理
 imageUpload.addEventListener('change', async (event) => {
   const file = event.target.files[0];
   const img = new Image();
@@ -34,7 +31,6 @@ imageUpload.addEventListener('change', async (event) => {
   };
 });
 
-// カメラからキャプチャして処理
 captureBtn.addEventListener('click', () => {
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
@@ -42,25 +38,27 @@ captureBtn.addEventListener('click', () => {
   detectObjects(canvas);
 });
 
-// 物体検出・分類別カウント
 async function detectObjects(input) {
   const predictions = await model.detect(input);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(input, 0, 0);
 
   const classCounts = {};
 
   predictions.forEach(pred => {
     if (pred.score > 0.6) {
-      // 描画
+      // バウンディングボックス
       ctx.strokeStyle = 'red';
       ctx.lineWidth = 2;
       ctx.strokeRect(...pred.bbox);
+
+      // ラベルテキスト
       ctx.font = '16px Arial';
-      ctx.fillStyle = 'red';
+      ctx.fillStyle = 'white';
       ctx.fillText(pred.class, pred.bbox[0], pred.bbox[1] > 10 ? pred.bbox[1] - 5 : 10);
 
-      // クラス別カウント
       classCounts[pred.class] = (classCounts[pred.class] || 0) + 1;
     }
   });
