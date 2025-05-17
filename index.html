@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>オブジェクトカウント</title>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.14.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
@@ -12,26 +13,36 @@
       color: white;
       text-align: center;
       margin: 0;
-      padding: 20px;
+      padding: 10px;
     }
-    canvas {
-      border: 1px solid #444;
+
+    input[type="file"],
+    button {
+      font-size: 1rem;
+      padding: 12px 20px;
+      margin: 10px auto;
+      display: block;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    video, canvas {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
       margin-top: 10px;
     }
-    video {
-      display: block;
-      margin: 10px auto;
-      max-width: 100%;
-    }
-    input, button {
-      margin: 10px;
-      padding: 10px;
-      font-size: 16px;
-    }
+
     #countResult {
       margin-top: 15px;
-      font-size: 18px;
+      font-size: 1.2rem;
       color: #0f0;
+      padding: 0 10px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      margin-bottom: 15px;
     }
   </style>
 </head>
@@ -39,7 +50,7 @@
   <h1>画像内オブジェクトのカウント</h1>
 
   <input type="file" id="imageUpload" accept="image/*">
-  <video id="video" width="400" autoplay muted playsinline></video><br>
+  <video id="video" autoplay muted playsinline></video>
   <button id="capture">撮影してカウント</button>
 
   <canvas id="canvas"></canvas>
