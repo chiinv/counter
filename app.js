@@ -1,38 +1,77 @@
-const imageUpload = document.getElementById('imageUpload');
+const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
+const captureBtn = document.getElementById('capture');
+const imageUpload = document.getElementById('imageUpload');
 const result = document.getElementById('countResult');
 
 let model;
 
+// モデル読み込み
 async function loadModel() {
   model = await cocoSsd.load();
 }
 loadModel();
 
+// カメラ起動
+navigator.mediaDevices.getUserMedia({ video: true })
+  .then(stream => {
+    video.srcObject = stream;
+  })
+  .catch(err => {
+    console.error('カメラ起動エラー:', err);
+  });
+
+// ファイルアップロード時の処理
 imageUpload.addEventListener('change', async (event) => {
   const file = event.target.files[0];
   const img = new Image();
   img.src = URL.createObjectURL(file);
-  img.onload = async () => {
+  img.onload = () => {
     canvas.width = img.width;
     canvas.height = img.height;
-    ctx.drawImage(img, 0, 0);
-    const predictions = await model.detect(img);
-
-    ctx.font = '18px Arial';
-    let count = 0;
-    for (let p of predictions) {
-      if (p.score > 0.6) {
-        count++;
-        ctx.beginPath();
-        ctx.rect(...p.bbox);
-        ctx.strokeStyle = 'red';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.fillText(`${p.class} (${Math.round(p.score * 100)}%)`, p.bbox[0], p.bbox[1] > 10 ? p.bbox[1] - 5 : 10);
-      }
-    }
-    result.innerText = `検出数: ${count}個`;
+    detectObjects(img);
   };
 });
+
+// カメラからキャプチャして処理
+captureBtn.addEventListener('click', () => {
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  ctx.drawImage(video, 0, 0);
+  detectObjects(canvas);
+});
+
+// 物体検出・分類別カウント
+async function detectObjects(input) {
+  const predictions = await model.detect(input);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(input, 0, 0);
+
+  const classCounts = {};
+
+  predictions.forEach(pred => {
+    if (pred.score > 0.6) {
+      // 描画
+      ctx.strokeStyle = 'red';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(...pred.bbox);
+      ctx.font = '16px Arial';
+      ctx.fillStyle = 'red';
+      ctx.fillText(pred.class, pred.bbox[0], pred.bbox[1] > 10 ? pred.bbox[1] - 5 : 10);
+
+      // クラス別カウント
+      classCounts[pred.class] = (classCounts[pred.class] || 0) + 1;
+    }
+  });
+
+  if (Object.keys(classCounts).length === 0) {
+    result.innerHTML = "検出されたオブジェクトはありません。";
+    return;
+  }
+
+  const countText = Object.entries(classCounts)
+    .map(([label, count]) => `${label}: ${count}個`)
+    .join("<br>");
+  result.innerHTML = `<b>検出結果:</b><br>${countText}`;
+}

@@ -2,16 +2,49 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Object Counter</title>
+  <title>オブジェクトカウント</title>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.14.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: white;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    canvas {
+      border: 1px solid #444;
+      margin-top: 10px;
+    }
+    video {
+      display: block;
+      margin: 10px auto;
+      max-width: 100%;
+    }
+    input, button {
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    #countResult {
+      margin-top: 15px;
+      font-size: 18px;
+      color: #0f0;
+    }
+  </style>
 </head>
 <body>
-  <h1>画像内のオブジェクトをカウント</h1>
-  <input type="file" id="imageUpload">
+  <h1>画像内オブジェクトのカウント</h1>
+
+  <input type="file" id="imageUpload" accept="image/*">
+  <video id="video" width="400" autoplay muted playsinline></video><br>
+  <button id="capture">撮影してカウント</button>
+
   <canvas id="canvas"></canvas>
   <div id="countResult"></div>
+
   <script src="app.js"></script>
 </body>
 </html>
